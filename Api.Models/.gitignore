@@ -1,0 +1,13 @@
+
+
+# Build Results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+bld/
