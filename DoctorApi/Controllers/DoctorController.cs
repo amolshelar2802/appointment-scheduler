@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
-using DoctorApi.Interface;
+using Api.DAL.Implementation;
+using Api.DAL.Interface;
 using Api.Models;
 
 

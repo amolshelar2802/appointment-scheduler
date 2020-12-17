@@ -2,7 +2,7 @@
 using Api.Models;
 using System.Collections.Generic;
 
-namespace DoctorApi.Interface
+namespace Api.DAL.Interface
 {
     public interface IDoctorsRepository
     {

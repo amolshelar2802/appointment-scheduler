@@ -1,0 +1,9 @@
+
+version: '3.4'
+
+services:
+  patientdataconsumer:
+    image: patientdataconsumer
+    build:
+      context: .
+      dockerfile: ./Dockerfile_PatientDataConsumer

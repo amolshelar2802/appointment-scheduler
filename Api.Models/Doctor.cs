@@ -4,8 +4,7 @@ namespace Api.Models
 {
     public class Doctor
     {
-        public DateTime CreatedDate { get; set; }
-
+        
         public int Id { get; set; }
 
         public string FirstName { get; set; }
@@ -19,5 +18,8 @@ namespace Api.Models
         public string Phone { get; set; }
 
         public string Email { get; set; }
+
+		public DateTime CreatedDate { get; set; }
+
     }
 }

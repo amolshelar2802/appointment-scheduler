@@ -1,24 +1,28 @@
-﻿
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions;
-using System.Data;
+﻿using System.Data;
 using System.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Api.DAL.Interface;
+using Api.Models;
+using Microsoft.Extensions.Options;
 
-namespace DoctorApi.Interface
+namespace Api.DAL.Implementation
 {
-    public class DNTConnectionFactory : IDNTConnectionFactory
+    public class PatientConnectionFactory : IDNTConnectionFactory
     {
         private IDbConnection _connection;
         //private readonly IOptions<NorthWindConfiguration> _configs;
         private readonly IConfiguration _configuration;
         private readonly string _connectionString;
+        private readonly AppSettings _appSettings;
 
-        public DNTConnectionFactory(IConfiguration iConfig)
+        public PatientConnectionFactory(IConfiguration iConfig, IOptions<AppSettings> appSettings)
         {
             //_configs = Configs;
             _configuration = iConfig;
-            _connectionString = _configuration.GetSection("ConnectionString").Value;
+            _appSettings = appSettings.Value;
+            _connectionString = _appSettings.PatientDB.ConnectionString;
+            //_connectionString = _configuration.GetSection("ConnectionString").Value;
+
 
         }
 

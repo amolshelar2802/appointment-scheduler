@@ -1,59 +1,59 @@
 ﻿using Dapper;
-using DoctorApi.Interface;
+using Api.DAL.Interface;
 using Api.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 
-namespace DoctorApi.Implementation
+namespace Api.DAL.Implementation
 {
-    public class DoctorsRepository : IDoctorsRepository
+    public class PatientsRepository : IPatientsRepository
     {
         private readonly IDNTConnectionFactory _connectionFactory;
 
-        public DoctorsRepository(IDNTConnectionFactory connectionFactory)
+        public PatientsRepository(IDNTConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory;
         }
 
-        public int AddDoctor(Doctor doctor)
+        public int AddPatient(Patient patient)
         {
-            string procName = "spDoctorInsert";
+            string procName = "spPatientInsert";
             var param = new DynamicParameters();
-            int doctorId = 0;
+            int patientId = 0;
             
-            param.Add("@Id", doctor.Id, null, ParameterDirection.Output);
-            param.Add("@FirstName", doctor.FirstName);
-            param.Add("@LastName", doctor.LastName);
-            //param.Add("@DOB", doctor.DOB);
-            //param.Add("@Gender", doctor.Gender);
-            param.Add("@Phone", doctor.Phone);
-            param.Add("@Email", doctor.Email);
+            param.Add("@Id", patient.Id, null, ParameterDirection.Output);
+            param.Add("@FirstName", patient.FirstName);
+            param.Add("@LastName", patient.LastName);
+            param.Add("@DOB", patient.DOB);
+            param.Add("@Gender", patient.Gender);
+            param.Add("@Phone", patient.Phone);
+            param.Add("@Email", patient.Email);
 
             try
             {
                 SqlMapper.Execute(_connectionFactory.GetConnection,
                 procName, param, commandType: CommandType.StoredProcedure);
 
-                doctorId = param.Get<int>("@Id");
+                patientId = param.Get<int>("@Id");
             }
             finally
             {
                 _connectionFactory.CloseConnection();
             }
 
-            return doctorId;
+            return patientId;
         }
 
-        public bool DeleteDoctor(int DoctorId)
+        public bool DeletePatient(int PatientId)
         {
             bool IsDeleted = true;            
-            var SqlQuery = @"DELETE FROM Doctors WHERE DoctorID = @Id";
+            var SqlQuery = @"DELETE FROM Patients WHERE PatientID = @Id";
 
             using (IDbConnection conn = _connectionFactory.GetConnection)
             {
-                var rowsaffected = conn.Execute(SqlQuery, new { Id = DoctorId });
+                var rowsaffected = conn.Execute(SqlQuery, new { Id = PatientId });
                 if (rowsaffected <= 0)
                 {
                     IsDeleted = false;  
@@ -62,33 +62,33 @@ namespace DoctorApi.Implementation
             return IsDeleted;
         }
 
-        public Doctor GetDoctorById(int doctorId)
+        public Patient GetPatientById(int patientId)
         {
-            var Doctor = new Doctor();
-            var procName = "spDoctorFetch";
+            var Patient = new Patient();
+            var procName = "spPatientFetch";
             var param = new DynamicParameters();
-            param.Add("@DoctorId", doctorId);
+            param.Add("@PatientId", patientId);
 
             try
             {
                 // using (var multiResult = SqlMapper.QueryMultiple(_connectionFactory.GetConnection,
                 // procName, param, commandType: CommandType.StoredProcedure))
                 // {
-                //     Doctors = multiResult.ReadFirstOrDefault<Doctor>();
-                //     //doctors.Territories = multiResult.Read<DoctorsTerritory>().ToList();
+                //     Patients = multiResult.ReadFirstOrDefault<Patient>();
+                //     //patients.Territories = multiResult.Read<PatientsTerritory>().ToList();
                 // }
 
                 // using (var result = SqlMapper.Query(_connectionFactory.GetConnection,
                 // procName, param, commandType: CommandType.StoredProcedure))
                 // {
-                //     Doctors = result.ReadFirstOrDefault<Doctor>();
-                //     //doctors.Territories = multiResult.Read<DoctorsTerritory>().ToList();
+                //     Patients = result.ReadFirstOrDefault<Patient>();
+                //     //patients.Territories = multiResult.Read<PatientsTerritory>().ToList();
                 // }
 
                 using (IDbConnection conn = _connectionFactory.GetConnection)
                 {   
-                    var result =  conn.Query<Doctor>(procName, param: param, commandType: CommandType.StoredProcedure);
-                    Doctor = result.FirstOrDefault();
+                    var result =  conn.Query<Patient>(procName, param: param, commandType: CommandType.StoredProcedure);
+                    Patient = result.FirstOrDefault();
                 }
 
                 
@@ -98,42 +98,44 @@ namespace DoctorApi.Implementation
                 _connectionFactory.CloseConnection();
             }
 
-            return Doctor;
+            return Patient;
         }
 
-        public IList<Doctor> GetDoctorsByQuery()
+        public IList<Patient> GetPatientsByQuery()
         {
-            var EmpList = new List<Doctor>();
+            var EmpList = new List<Patient>();
             var SqlQuery = @"SELECT [Id]
                             ,[FirstName]
                             ,[LastName]
+                            ,[DOB]
+                            ,[Gender]
                             ,[Phone]
                             ,[Email]
                             ,[Address]
                             ,[CreatedDate]
-                        FROM [DoctorData].[dbo].[Doctors]";
+                        FROM [PatientData].[dbo].[Patients]";
 
             using (IDbConnection conn = _connectionFactory.GetConnection)
             {   
-                var result =  conn.Query<Doctor>(SqlQuery);
+                var result =  conn.Query<Patient>(SqlQuery);
                 return result.ToList();
             }
         }
 
-        public bool UpdateDoctor(int DoctorId, Doctor doctor)
+        public bool UpdatePatient(int PatientId, Patient patient)
         {
-            string procName = "spDoctorUpdate";
+            string procName = "spPatientUpdate";
             var param = new DynamicParameters();
             bool IsSuccess = true;
 
             
-            param.Add("@DoctorId", doctor.Id);
-            param.Add("@FirstName", doctor.FirstName);
-            param.Add("@LastName", doctor.LastName);
-            //param.Add("@DOB", doctor.DOB);
-            //param.Add("@Gender", doctor.Gender);
-            param.Add("@Phone", doctor.Phone);
-            param.Add("@Email", doctor.Email);
+            param.Add("@PatientId", patient.Id);
+            param.Add("@FirstName", patient.FirstName);
+            param.Add("@LastName", patient.LastName);
+            param.Add("@DOB", patient.DOB);
+            param.Add("@Gender", patient.Gender);
+            param.Add("@Phone", patient.Phone);
+            param.Add("@Email", patient.Email);
 
             try
             {
