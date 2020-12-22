@@ -26,8 +26,8 @@ namespace PatientDataConsumer
                 {
                     services.AddHostedService<Worker>();
 
-                    services.AddTransient<IDNTConnectionFactory, DNTConnectionFactory>();            
-                    services.AddSingleton<IPatientsRepository, PatientsRepository>();
+                    services.AddTransient<IDNTConnectionFactory, AppointmentConnectionFactory>();            
+                    services.AddSingleton<IAppointmentsRepository, AppointmentsRepository>();
                     //services.AddScoped<IPatientsRepository, PatientsRepository>();
 
                      var configuration = new ConfigurationBuilder()

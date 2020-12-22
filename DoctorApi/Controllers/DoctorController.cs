@@ -15,7 +15,7 @@ using Api.Models;
 namespace DoctorApi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/doctors/")]
     public class DoctorController : ControllerBase
     {
         

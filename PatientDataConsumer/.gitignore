@@ -11,3 +11,6 @@
 x64/
 x86/
 bld/
+.vscode/
+.git/
+.git/info/exclude

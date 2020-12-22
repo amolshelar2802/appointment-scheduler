@@ -21,27 +21,32 @@ namespace PatientDataConsumer
         private readonly ILogger<Worker> _logger;
 
         private readonly AppSettings _appSettings;
-        private readonly IPatientsRepository _patientRepository;
+        private readonly IAppointmentsRepository _appointmentRepository;
 
-        static string connectionString = "Endpoint=sb://amol-service-bus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=LpyL17/4gzckMYLDejoLApmRKOo7UeBKb8wE6eAQezE=";
-        static string topicName = "sampletopic";
-        static string subscriptionName = "testsubscribe";
+        private readonly string connectionString;
+        private readonly string topicName;
+        private readonly string subscriptionName;
 
         bool stopProcess = false;
-        public Worker(ILogger<Worker> logger, IOptions<AppSettings> appSettings, IPatientsRepository patientRepository)
+        public Worker(ILogger<Worker> logger, IOptions<AppSettings> appSettings, IAppointmentsRepository appointmentRepository)
         {
             _logger = logger;
-            _patientRepository = patientRepository;
+            _appointmentRepository = appointmentRepository;
             _appSettings = appSettings?.Value ?? throw new ArgumentNullException(nameof(appSettings));
+
+            connectionString = _appSettings.AzureServiceBusSettings.ConnectionString;
+            topicName = _appSettings.AzureServiceBusSettings.PatientAzureServiceBusSettings.TopicName;
+            subscriptionName = _appSettings.AzureServiceBusSettings.PatientAzureServiceBusSettings.Subscription;
+
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-                _logger.LogInformation("connection string " + _appSettings.AzureServiceBusSettings.ConnectionString);
-                _logger.LogInformation("Topics " + _appSettings.AzureServiceBusSettings.PatientAzureServiceBusSettings.TopicName);
-                _logger.LogInformation("Subscription " + _appSettings.AzureServiceBusSettings.PatientAzureServiceBusSettings.Subscription);
+                _logger.LogInformation("connection string " + connectionString);
+                _logger.LogInformation("Topics " + topicName);
+                _logger.LogInformation("Subscription " + subscriptionName);
 
                 await using (ServiceBusClient client = new ServiceBusClient(connectionString))
                 {
@@ -86,32 +91,73 @@ namespace PatientDataConsumer
         private async Task ObjectMessageHandler(ProcessMessageEventArgs args)
         {
 
-            string body = args.Message.Body.ToString();
-            //Console.WriteLine($"Received: {body} from subscription: {subscriptionName}");
-            
-            _logger.LogInformation("Received Body : " + body );
-
-            if(body.ToLower() == "stop")
+            try
             {
-                _logger.LogInformation("STOP message received.....");
-                _logger.LogInformation("STOP command triggering.....");
-                stopProcess = true;
-            }
-            else
-            {
-                var patient = JsonSerializer.Deserialize<Patient>(body);
+                string body = args.Message.Body.ToString();
+                //Console.WriteLine($"Received: {body} from subscription: {subscriptionName}");
+                
+                _logger.LogInformation("Received Body : " + body );
 
-                            if(patient != null)
-                            {
-                                _logger.LogInformation($" Patient FirstName : { patient.FirstName }");
-                                _patientRepository.AddPatient(patient);
-                            }
+                if(body.ToLower() == "stop")
+                {
+                    _logger.LogInformation("STOP message received.....");
+                    _logger.LogInformation("STOP command triggering.....");
+                    stopProcess = true;
+                }
+                else
+                {
+                    var patientMessage = JsonSerializer.Deserialize<PatientMessage>(body);
+
+                    Patient patient = null;
+                    if(patientMessage == null)
+                    {
+                        return;
+                    }
+                    if(patientMessage.Patient != null)
+                    {
+                        patient = patientMessage.Patient;    
+                    }
+                    
+                    var patientId = patientMessage.Id;
+
+                    var command = patientMessage.Command.ToLower();
+
+                    switch(command)
+                    {
+                        case "add_patient":
+                        {
+                            //_logger.LogInformation($" Patient FirstName : { patient.FirstName }");
+                            patient.Id = patientId;
+                            _appointmentRepository.AddPatient(patient);
+                            break;
+                        }
+
+                        case "update_patient":
+                        {
+                            _appointmentRepository.UpdatePatient(patientId, patient);
+                            break;
+                        }
+
+                        case "delete_patient":
+                        {
+                            _appointmentRepository.DeletePatient(patientId);
+                            break;
+                        }
+
+                    }
+
+                }
+
+                // complete the message. messages is deleted from the queue. 
+                await args.CompleteMessageAsync(args.Message);
+
+            }
+            catch(Exception ex)
+            {
+                _logger.LogInformation("Excption : " + ex.Message + "\r\n" + ex.StackTrace);
             }
 
             
-
-            // complete the message. messages is deleted from the queue. 
-            await args.CompleteMessageAsync(args.Message);
         }
 
         private Task ObjectErrorHandler(ProcessErrorEventArgs args)

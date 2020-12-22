@@ -6,6 +6,8 @@ namespace Api.Models
         public PatientDB PatientDB { get; set;}
 
         public DoctorDB DoctorDB { get; set;}
+		
+		public AppointmentDB AppointmentDB { get; set;}
 
         public AzureServiceBusSettings AzureServiceBusSettings { get; set;}
     }
@@ -19,7 +21,11 @@ namespace Api.Models
     public class DoctorDB
     {
         public string ConnectionString { get; set;}
-
+    }
+	
+	public class AppointmentDB
+    {
+        public string ConnectionString { get; set;}
     }
 
     public class AzureServiceBusSettings

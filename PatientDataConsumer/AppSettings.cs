@@ -5,10 +5,18 @@ namespace PatientDataConsumer
     {
         public PatientDB PatientDB { get; set;}
 
+        public AppointmentDB AppointmentDB { get; set;}
+
         public AzureServiceBusSettings AzureServiceBusSettings { get; set;}
     }
 
     public class PatientDB
+    {
+        public string ConnectionString { get; set;}
+
+    }
+
+    public class AppointmentDB
     {
         public string ConnectionString { get; set;}
 

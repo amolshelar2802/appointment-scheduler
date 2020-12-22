@@ -49,7 +49,7 @@ namespace Api.DAL.Implementation
         public bool DeletePatient(int PatientId)
         {
             bool IsDeleted = true;            
-            var SqlQuery = @"DELETE FROM Patients WHERE PatientID = @Id";
+            var SqlQuery = @"DELETE FROM Patients WHERE ID = @Id";
 
             using (IDbConnection conn = _connectionFactory.GetConnection)
             {
