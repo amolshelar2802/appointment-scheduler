@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Api.DAL.Implementation;
 using Api.DAL.Interface;
 using Api.Models;
+using DoctorApi.MessageBroker.Interface;
 
 
 namespace DoctorApi.Controllers
@@ -24,13 +25,19 @@ namespace DoctorApi.Controllers
 
         private readonly IDoctorsRepository _doctorRepository;
 
+        private readonly IDoctorMessagePublisher _doctorMessagePublisher;
+
         public List<Doctor> doctors = new List<Doctor>();
 
-        public DoctorController(ILogger<DoctorController> logger, IConfiguration iConfig, IDoctorsRepository doctorRepository)
+        public DoctorController(ILogger<DoctorController> logger, 
+                                IConfiguration iConfig, 
+                                IDoctorsRepository doctorRepository,
+                                IDoctorMessagePublisher doctorMessagePublisher)
         {
             _logger = logger;
             _configuration = iConfig;
             _doctorRepository = doctorRepository;
+            _doctorMessagePublisher = doctorMessagePublisher;
         }
 
         [HttpGet]
@@ -44,10 +51,28 @@ namespace DoctorApi.Controllers
         }
 
         [HttpPost]
-        public void Post([FromBody]Doctor doctor)
+        //public void Post([FromBody]Doctor doctor)
+        public async Task<ActionResult> Post([FromBody]Doctor doctor)
         {
             //doctors.Add(doctor);
-            _doctorRepository.AddDoctor(doctor);
+            int newId = _doctorRepository.AddDoctor(doctor);
+
+            if(newId <= 0)
+            {
+                return BadRequest();
+            }
+
+            DoctorMessage doctorMessage = new DoctorMessage()
+            {
+                Id = newId,
+                Doctor = doctor,
+                Command = "add_doctor"
+            };
+
+            await _doctorMessagePublisher.PublishMessage(doctorMessage);
+
+            return Ok();
+
         }
         
         
@@ -65,16 +90,53 @@ namespace DoctorApi.Controllers
 
 
         [HttpPut("{id}")]
-        public ActionResult Put(int id, [FromBody]Doctor doctor)
+        public async Task<ActionResult> Put(int id, [FromBody]Doctor doctor)
         {
+            // var retval = _doctorRepository.UpdateDoctor(id, doctor);
+            // return Ok(retval);
+
             var retval = _doctorRepository.UpdateDoctor(id, doctor);
-            return Ok(retval);
+
+            if(!retval)
+            {
+                return BadRequest();
+            }
+
+            DoctorMessage doctorMessage = new DoctorMessage()
+            {
+                Id = id,
+                Doctor = doctor,
+                Command = "update_doctor"
+            };
+
+            await _doctorMessagePublisher.PublishMessage(doctorMessage);
+
+            return Ok();
+
         }
 
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            _doctorRepository.DeleteDoctor(id);
+            //_doctorRepository.DeleteDoctor(id);
+
+            var retval = _doctorRepository.DeleteDoctor(id);
+            if(!retval)
+            {
+                return BadRequest();
+            }
+
+            DoctorMessage doctorMessage = new DoctorMessage()
+            {
+                Id = id,
+                Doctor = null,
+                Command = "delete_doctor"
+            };
+
+            await _doctorMessagePublisher.PublishMessage(doctorMessage);
+
+            return Ok();
+
         }
 
         [Route("[action]")]

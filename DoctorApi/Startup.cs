@@ -13,7 +13,8 @@ using Microsoft.Extensions.Logging;
 using Api.Models;
 using Api.DAL.Interface;
 using Api.DAL.Implementation;
-
+using DoctorApi.MessageBroker.Interface;
+using DoctorApi.MessageBroker.Implementation;
 
 namespace DoctorApi
 {
@@ -37,7 +38,7 @@ namespace DoctorApi
             services.AddTransient<IDNTConnectionFactory, DoctorConnectionFactory>();            
             services.AddScoped<IDoctorsRepository, DoctorsRepository>();
 
-            //services.AddSingleton<IPatientMessagePublisher, PatientMessagePublisher>();
+            services.AddSingleton<IDoctorMessagePublisher, DoctorMessagePublisher>();
 
             var configuration = new ConfigurationBuilder()
                                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -63,7 +64,7 @@ namespace DoctorApi
             // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Patient API V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Doctor API V1");
             });
 
             app.UseRouting();

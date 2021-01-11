@@ -1,0 +1,22 @@
+FROM mcr.microsoft.com/dotnet/aspnet:3.1 AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
+WORKDIR /src
+COPY ["AppointmentApi/AppointmentApi.csproj", "AppointmentApi/"]
+COPY ["Api.DAL/Api.DAL.csproj", "Api.DAL/"]
+COPY ["Api.Models/Api.Models.csproj", "Api.Models/"]
+RUN dotnet restore "AppointmentApi/AppointmentApi.csproj"
+COPY . .
+WORKDIR "/src/AppointmentApi"
+RUN dotnet build "AppointmentApi.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "AppointmentApi.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "AppointmentApi.dll"]
+
