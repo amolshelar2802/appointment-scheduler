@@ -31,7 +31,7 @@ namespace AppointmentApi.Controllers
 
         [Route("[action]/doctorId")]
         [HttpGet]
-        public ActionResult<IList<Appointment>> GetAppointmentsByDoctorId(int doctorId)
+        public ActionResult<IList<AppointmentDetails>> GetAppointmentsByDoctorId(int doctorId)
         {
             var appointments = _appointmentsRepository.GetAppointmentsByDoctorId(doctorId);
             return Ok(appointments);
@@ -39,7 +39,7 @@ namespace AppointmentApi.Controllers
 
         [Route("[action]/patientId")]
         [HttpGet]
-        public ActionResult<IList<Appointment>> GetAppointmentsByPatientId(int patientId)
+        public ActionResult<IList<AppointmentDetails>> GetAppointmentsByPatientId(int patientId)
         {
             var appointments = _appointmentsRepository.GetAppointmentsByPatientId(patientId);
             return Ok(appointments);

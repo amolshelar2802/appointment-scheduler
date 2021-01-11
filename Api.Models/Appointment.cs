@@ -11,12 +11,7 @@ namespace Api.Models
         public string AppointmentDate { get; set; }
 		public string Status { get; set; }
         public DateTime CreatedDate { get; set; }
-        public string DoctorFirstName { get; set; }
-        public string DoctorLastName { get; set; }
-        public string Degree { get; set; }
-        public string Specialty { get; set; }
-        public string PatientFirstName { get; set; }
-        public string PatientLastName { get; set; }
+        
 
     }
 	

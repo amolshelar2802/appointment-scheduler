@@ -18,8 +18,8 @@ namespace Api.DAL.Interface
         IList<Doctor> GetDoctorsByQuery();
         bool UpdateDoctor(int DoctorId, Doctor doctor);
 
-        Appointment GetAppointmentsByDoctorId(int doctorId);
-        Appointment GetAppointmentsByPatientId(int patientId);
+        AppointmentDetails GetAppointmentsByDoctorId(int doctorId);
+        AppointmentDetails GetAppointmentsByPatientId(int patientId);
         bool AddAppointment(Appointment appointment);
         bool DeleteAppointment(int appointmentId);
 

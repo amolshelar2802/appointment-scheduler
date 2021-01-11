@@ -268,9 +268,9 @@ namespace Api.DAL.Implementation
 
         #region [Appointments]
 
-        public Appointment GetAppointmentsByDoctorId(int doctorId)
+        public AppointmentDetails GetAppointmentsByDoctorId(int doctorId)
         {
-            var appointment = new Appointment();
+            var appointment = new AppointmentDetails();
             var procName = "spGetAppointmentsByDoctorId";
             var param = new DynamicParameters();
             param.Add("@DoctorId", doctorId);
@@ -279,7 +279,7 @@ namespace Api.DAL.Implementation
             {
                 using (IDbConnection conn = _connectionFactory.GetConnection)
                 {   
-                    var result =  conn.Query<Appointment>(procName, param: param, commandType: CommandType.StoredProcedure);
+                    var result =  conn.Query<AppointmentDetails>(procName, param: param, commandType: CommandType.StoredProcedure);
                     appointment = result.FirstOrDefault();
                 }
             }
@@ -292,9 +292,9 @@ namespace Api.DAL.Implementation
         }
 
 
-        public Appointment GetAppointmentsByPatientId(int patientId)
+        public AppointmentDetails GetAppointmentsByPatientId(int patientId)
         {
-            var appointment = new Appointment();
+            var appointment = new AppointmentDetails();
             var procName = "spGetAppointmentsByPatientId";
             var param = new DynamicParameters();
             param.Add("@patientId", patientId);
@@ -303,7 +303,7 @@ namespace Api.DAL.Implementation
             {
                 using (IDbConnection conn = _connectionFactory.GetConnection)
                 {   
-                    var result =  conn.Query<Appointment>(procName, param: param, commandType: CommandType.StoredProcedure);
+                    var result =  conn.Query<AppointmentDetails>(procName, param: param, commandType: CommandType.StoredProcedure);
                     appointment = result.FirstOrDefault();
                 }
             }
