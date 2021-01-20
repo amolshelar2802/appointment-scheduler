@@ -10,6 +10,8 @@ namespace Api.Models
 		public AppointmentDB AppointmentDB { get; set;}
 
         public AzureServiceBusSettings AzureServiceBusSettings { get; set;}
+		
+		public RabbitMQSettings RabbitMQSettings { get; set; }
     }
 
     public class PatientDB
@@ -51,6 +53,13 @@ namespace Api.Models
     {
         public string TopicName { get; set;}
         public string Subscription { get; set;}
+    }
+	
+	public class RabbitMQSettings
+    {
+        public string AmqpUri { get; set;}
+        public string PatientQueueName { get; set;}
+		public string DoctorQueueName { get; set;}
     }
 
 }

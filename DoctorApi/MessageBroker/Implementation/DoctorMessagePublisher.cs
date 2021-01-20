@@ -9,37 +9,52 @@ using System.Text.Json.Serialization;
 using Api.Models;
 using Microsoft.Extensions.Options;
 using DoctorApi.MessageBroker.Interface;
-
+using RabbitMQ.Client;
 
 namespace DoctorApi.MessageBroker.Implementation
 {
     class DoctorMessagePublisher : IDoctorMessagePublisher
     {
-        private string _connectionString;
-        private string _topicName;
-
+        private string _amqpUri;
+        private string _queueName;
         private readonly AppSettings _appSettings;
 
         public DoctorMessagePublisher(IOptions<AppSettings> appSettings)
         {
             _appSettings = appSettings.Value;
-            _connectionString = _appSettings.AzureServiceBusSettings.ConnectionString; //"Endpoint=sb://amol-service-bus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=LpyL17/4gzckMYLDejoLApmRKOo7UeBKb8wE6eAQezE=";
-            _topicName = _appSettings.AzureServiceBusSettings.DoctorAzureServiceBusSettings.TopicName;//"sampletopic";
+            _amqpUri = _appSettings.RabbitMQSettings.AmqpUri; 
+            _queueName = _appSettings.RabbitMQSettings.DoctorQueueName;
         }
         
+
         public async Task PublishMessage(DoctorMessage doctorMessage)
         {
-            // create a Service Bus client 
-            await using (ServiceBusClient client = new ServiceBusClient(_connectionString))
+            await Task.Run(() =>
+                {
+                    Publish(doctorMessage);
+                });
+        }
+
+        public void Publish(DoctorMessage doctorMessage)
+        {
+            var factory = new ConnectionFactory
             {
-                // create a sender for the topic
-                ServiceBusSender sender = client.CreateSender(_topicName);
-                
-                string jsonString = JsonSerializer.Serialize(doctorMessage);
-                
-                await sender.SendMessageAsync(new ServiceBusMessage(jsonString));
-                //Console.WriteLine($"Sent a single message to the topic: {topicName}");
-            }
+                Uri = new Uri(_amqpUri)
+            };
+            var connection = factory.CreateConnection();
+            var channel = connection.CreateModel();
+
+            channel.QueueDeclare(_queueName,
+                                durable: true,
+                                exclusive: false,
+                                autoDelete: false,
+                                arguments: null);
+
+            string jsonString = JsonSerializer.Serialize(doctorMessage);
+            var body = Encoding.UTF8.GetBytes(jsonString);
+            channel.BasicPublish("", _queueName, null, body);
+
+
         }
 
 
